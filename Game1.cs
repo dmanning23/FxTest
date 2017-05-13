@@ -1,22 +1,11 @@
-﻿#region Using Statements
-using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System.IO;
-using Microsoft.Xna.Framework.Audio;
-using System.Diagnostics;
-
-#endregion
 
 //based on https://github.com/keijiro/RippleEffect
 
 namespace FxTest
 {
-
-
 	class Droplet
 	{
 		//Random rnd;
@@ -46,9 +35,7 @@ namespace FxTest
 		{
 			return new Vector3(position.X * aspect, position.Y, time);
 		}
-
 	}
-
 
 	/// <summary>
 	/// This is the main type for your game
@@ -80,9 +67,7 @@ namespace FxTest
 
 		int dropCount;
 
-
-		public Game1()
-		  : base()
+		public Game1() : base()
 		{
 			m_graphics = new GraphicsDeviceManager(this);
 
@@ -91,9 +76,7 @@ namespace FxTest
 			m_graphics.PreferredBackBufferHeight = 600;
 			this.IsMouseVisible = true;
 
-
 			Content.RootDirectory = "Content";
-
 
 			droplets = new Droplet[3];
 
@@ -112,14 +95,7 @@ namespace FxTest
 		/// </summary>
 		protected override void Initialize()
 		{
-
-			//Init OpEngine
-			string strpath = @"Assets";
-
 			spriteBatch = new SpriteBatch(m_graphics.GraphicsDevice);
-	
-
-
 
 			base.Initialize();
 		}
@@ -147,11 +123,8 @@ namespace FxTest
 
 			// create textures for reading back the backbuffer contents
 			sceneMap = new RenderTarget2D(GraphicsDevice, width, height, false, format, depthFormat);
-			//distortionMap = new RenderTarget2D(GraphicsDevice, width, height, false, format, depthFormat);
-
 
 			// Build Displacement texture
-
 
 			Curve waveform = new Curve();
 
@@ -167,7 +140,6 @@ namespace FxTest
 			waveform.Keys.Add(new CurveKey(0.85f, 0.52f, 0, 0));
 			waveform.Keys.Add(new CurveKey(0.99f, 0.50f, 0, 0));
 
-
 			gradTexture = new Texture2D(GraphicsDevice, 256, 1, false, SurfaceFormat.Color);
 
 			Color[] datas = new Color[256];
@@ -180,12 +152,6 @@ namespace FxTest
 			}
 
 			gradTexture.SetData<Color>(datas);
-
-			//var stream = File.Create("c:\\temp\\file.png");
-			//gradTexture.SaveAsPng(stream, 2048,1);
-
-
-
 		}
 
 		/// <summary>
@@ -218,30 +184,20 @@ namespace FxTest
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Update(GameTime gameTime)
 		{
-			//if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-			//  Exit();
-
 			var ms = Mouse.GetState();
-			
+
 			spritePos = ms.Position.ToVector2();
 
-
 			if (dropInterval > 0)
-
 			{
-
 				timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
 				while (timer > dropInterval)
-
 				{
-
 					droplets[dropCount++ % droplets.Length].Reset();
 
 					timer -= dropInterval;
-
 				}
-
 			}
 
 			foreach (var d in droplets)
@@ -256,12 +212,7 @@ namespace FxTest
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Draw(GameTime gameTime)
 		{
-
-			
-
 			var gd1 = GraphicsDevice;
-
-			
 
 			Viewport viewport = GraphicsDevice.Viewport;
 
@@ -277,47 +228,40 @@ namespace FxTest
 
 			this.distortEffect.Parameters["GradTexture"].SetValue(this.gradTexture);
 
-			this.distortEffect.Parameters["_Reflection"].SetValue(reflectionColor.ToVector4() );
+			this.distortEffect.Parameters["_Reflection"].SetValue(reflectionColor.ToVector4());
 
 			this.distortEffect.Parameters["_Params1"].SetValue(new Vector4(aspect, 1, 1 / waveSpeed, 0));    // [ aspect, 1, scale, 0 ]
 			this.distortEffect.Parameters["_Params2"].SetValue(new Vector4(1, 1 / aspect, refractionStrength, reflectionStrength));    // [ 1, 1/aspect, refraction, reflection ]
 
 			this.distortEffect.Parameters["_Drop1"].SetValue(droplets[0].MakeShaderParameter(aspect));
 
-
 			//Draw background for test
 			GraphicsDevice.SetRenderTarget(sceneMap);
-
 
 			GraphicsDevice.Clear(Color.CornflowerBlue);
 			DrawFullscreenQuad(backgroundTexture, viewport.Width, viewport.Height, null);
 
-
 			//Drawing sprites effect
 			spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque, null, DepthStencilState.None, null, distortEffect);
 
-            //spriteBatch.Draw(sceneMap, new Rectangle((int)spritePos.X - 128, (int)spritePos.Y - 128 , 256, 256), Color.White);
+			Color c = Color.White;
 
-            Color c = Color.White;
+			Vector2 scaleFactor = new Vector2(0.5f, 0.5f);
+			Vector2 origin = new Vector2(sceneMap.Width / 2, sceneMap.Height / 2);
+			Vector2 pos = new Vector2((int)spritePos.X, (int)spritePos.Y);
 
-            Vector2 scaleFactor = new Vector2(0.5f, 0.5f);
-            Vector2 origin = new Vector2(sceneMap.Width / 2 , sceneMap.Height / 2 );
-            Vector2 pos = new Vector2((int)spritePos.X , (int)spritePos.Y );
+			spriteBatch.Draw(sceneMap,
+						pos,
+						null,
+						c,
+						0f,
+						origin,
+						scaleFactor, //m_particles[i].lifeTime / (float)m_nEndLifeTime,
+						SpriteEffects.None,
+						0
+					 );
 
-            spriteBatch.Draw(sceneMap,
-                        pos,
-                        null,
-                        c,
-                        0f,
-                        origin,
-                        scaleFactor, //m_particles[i].lifeTime / (float)m_nEndLifeTime,
-                        SpriteEffects.None,
-                        0
-                     );
-
-
-
-            var d = droplets[0].MakeShaderParameter(aspect);
+			var d = droplets[0].MakeShaderParameter(aspect);
 			d.Z += 0.1f;
 			this.distortEffect.Parameters["_Drop1"].SetValue(d);
 
@@ -325,14 +269,10 @@ namespace FxTest
 
 			spriteBatch.End();
 
-
-
 			GraphicsDevice.SetRenderTarget(null);
 			DrawFullscreenQuad(sceneMap, viewport.Width, viewport.Height, null);
 
-
 			base.Draw(gameTime);
-
 		}
 
 		/// <summary>
@@ -341,11 +281,9 @@ namespace FxTest
 		/// </summary>
 		void DrawFullscreenQuad(Texture2D texture, int width, int height, Effect effect)
 		{
-
 			spriteBatch.Begin(0, BlendState.Opaque, null, null, null, effect);
 			spriteBatch.Draw(texture, new Rectangle(0, 0, width, height), Color.White);
 			spriteBatch.End();
 		}
-
 	}
 }
