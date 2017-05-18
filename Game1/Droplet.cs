@@ -9,20 +9,17 @@ namespace Game1
 {
 	class Droplet
 	{
-		//Random rnd;
 		Vector2 position;
 
 		float time;
 
 		public Droplet()
 		{
-			//rnd = new Random(1234);
 			time = 1000;
 		}
 
 		public void Reset()
 		{
-			//position = new Vector2((float)rnd.NextDouble(), (float)rnd.NextDouble());
 			position = new Vector2(0.5f, 0.5f);
 			time = 0;
 		}

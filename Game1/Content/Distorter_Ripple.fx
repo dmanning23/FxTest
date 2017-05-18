@@ -1,21 +1,17 @@
 
 //http://gamedev.stackexchange.com/questions/18201/wave-ripple-effect
 
-/* Variables */
-
 matrix	MatrixTransform;
-
 
 float4 _Params1;    // [ aspect, 1, scale, 0 ]
 float4 _Params2;    // [ 1, 1/aspect, refraction, reflection ]
 
 float3 _Drop1;
-float3 _Drop2;
-float3 _Drop3;
 
 float4 _Reflection;	//color
 
 texture TextureMap; // texture 0 => screen render
+
 sampler2D textureMapSampler = sampler_state
 {
 	Texture = (TextureMap);
@@ -35,7 +31,6 @@ sampler2D GradTextureSampler = sampler_state
 	AddressV = Clamp;
 };
 
-
 struct VertexShaderOutput
 {
 	float4 Position : SV_POSITION;
@@ -54,7 +49,6 @@ VertexShaderOutput VertexShaderFunction(float4 position:POSITION, float2 texcoor
 	return output;
 }
 
-
 float wave(float2 position, float2 origin, float time)
 {
 	float d = length(position - origin);
@@ -63,18 +57,9 @@ float wave(float2 position, float2 origin, float time)
 	return (tex2D(GradTextureSampler, float2(t, 0)).a - 0.5f) * 2;
 }
 
-
-
 float allwave(float2 position)
 {
-	//return
-	//	wave(position, _Drop1.xy, _Drop1.z) +
-	//	wave(position, _Drop2.xy, _Drop2.z) +
-	//	wave(position, _Drop3.xy, _Drop3.z);
-
-	return
-		wave(position, _Drop1.xy, _Drop1.z);
-
+	return wave(position, _Drop1.xy, _Drop1.z);
 }
 
 float4 PixelShaderFunction(VertexShaderOutput input) : SV_Target
@@ -93,19 +78,14 @@ float4 PixelShaderFunction(VertexShaderOutput input) : SV_Target
 	float w = allwave(p);
 
 	float2 dw = float2(allwave(p + dx) - w, allwave(p + dy) - w);
-
-
-
+	
 	//Attenuation
 	float distance = length(p - _Drop1.xy) * 1.5f;
 	float multiplier = (distance < 1.0) ? ((distance - 1.0)*(distance - 1.0)) : 0.0;
 	dw *= multiplier;
 
-
 	//UV
 	float2 duv = dw * _Params2.xy * 0.2f * _Params2.z;
-
-	
 
 	//Reflexion
 	float fr = pow(length(dw) * 3 * _Params2.w, 3);
@@ -114,12 +94,9 @@ float4 PixelShaderFunction(VertexShaderOutput input) : SV_Target
 	float4 c = tex2D(textureMapSampler, screen + duv);
 
 	float4 texColor = lerp(c, _Reflection, fr);
-
-	//texColor.x += 0.5;	//Help to show sprite zone
-
+	
 	return texColor;
 }
-
 
 technique Technique1
 {
@@ -132,6 +109,5 @@ technique Technique1
 		VertexShader = compile vs_3_0 VertexShaderFunction();
 		PixelShader = compile ps_3_0 PixelShaderFunction();
 #endif
-
 	}
 }

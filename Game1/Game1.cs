@@ -13,26 +13,22 @@ namespace Game1
 		SpriteBatch spriteBatch;
 
 		Effect distortEffect;
-		EffectTechnique distortTechnique;
 
 		RenderTarget2D sceneMap;
-		RenderTarget2D distortionMap;
 
 		Texture2D backgroundTexture;
 		Texture2D gradTexture;
 
 		Vector2 spritePos;
-
-		Droplet[] droplets;
+		
+		Droplet droplet;
 		public float waveSpeed = 1.25f;
 		public float reflectionStrength = 1.7f;
 		public Color reflectionColor = Color.Gray;
-		public float refractionStrength = 1.5f;
-		public float dropInterval = 0.5f;
+		public float refractionStrength = 2.5f;
+		public float dropInterval = 1.5f;
 
 		float timer;
-
-		int dropCount;
 
 		public Game1()
 		{
@@ -45,13 +41,7 @@ namespace Game1
 
 			Content.RootDirectory = "Content";
 
-			droplets = new Droplet[3];
-
-			droplets[0] = new Droplet();
-
-			droplets[1] = new Droplet();
-
-			droplets[2] = new Droplet();
+			droplet = new Droplet();
 		}
 
 		/// <summary>
@@ -76,7 +66,6 @@ namespace Game1
 		{
 			// TODO: use this.Content to load your game content here
 			distortEffect = Content.Load<Effect>("Distorter_Ripple");
-			distortTechnique = distortEffect.Techniques["Technique1"];
 
 			backgroundTexture = Content.Load<Texture2D>("background");
 
@@ -128,18 +117,12 @@ namespace Game1
 			// TODO: Unload any non ContentManager content here
 			spriteBatch = null;
 			distortEffect = null;
-			distortTechnique = null;
 			gradTexture = null;
 
 			if (sceneMap != null)
 			{
 				sceneMap.Dispose();
 				sceneMap = null;
-			}
-			if (distortionMap != null)
-			{
-				distortionMap.Dispose();
-				distortionMap = null;
 			}
 		}
 
@@ -160,13 +143,12 @@ namespace Game1
 
 				while (timer > dropInterval)
 				{
-					droplets[dropCount++ % droplets.Length].Reset();
+					droplet.Reset();
 					timer -= dropInterval;
 				}
 			}
 
-			foreach (var d in droplets)
-				d.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+			droplet.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
 
 			base.Update(gameTime);
 		}
@@ -194,7 +176,7 @@ namespace Game1
 			this.distortEffect.Parameters["_Reflection"].SetValue(reflectionColor.ToVector4());
 			this.distortEffect.Parameters["_Params1"].SetValue(new Vector4(aspect, 1, 1 / waveSpeed, 0));    // [ aspect, 1, scale, 0 ]
 			this.distortEffect.Parameters["_Params2"].SetValue(new Vector4(1, 1 / aspect, refractionStrength, reflectionStrength));    // [ 1, 1/aspect, refraction, reflection ]
-			this.distortEffect.Parameters["_Drop1"].SetValue(droplets[0].MakeShaderParameter(aspect));
+			this.distortEffect.Parameters["_Drop1"].SetValue(droplet.MakeShaderParameter(aspect));
 
 			//Draw background for test
 			GraphicsDevice.SetRenderTarget(sceneMap);
@@ -217,16 +199,16 @@ namespace Game1
 						c,
 						0f,
 						origin,
-						scaleFactor, //m_particles[i].lifeTime / (float)m_nEndLifeTime,
+						scaleFactor,
 						SpriteEffects.None,
 						0
 					 );
 
-			var d = droplets[0].MakeShaderParameter(aspect);
-			d.Z += 0.1f;
-			this.distortEffect.Parameters["_Drop1"].SetValue(d);
+			//var d = droplet.MakeShaderParameter(aspect);
+			//d.Z += 0.1f;
+			//this.distortEffect.Parameters["_Drop1"].SetValue(d);
 
-			spriteBatch.Draw(sceneMap, new Rectangle(100, 100, 256, 256), Color.White);
+			//spriteBatch.Draw(sceneMap, new Rectangle(100, 100, 256, 256), Color.White);
 
 			spriteBatch.End();
 
