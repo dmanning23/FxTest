@@ -178,40 +178,21 @@ namespace Game1
 			this.distortEffect.Parameters["_Params2"].SetValue(new Vector4(1, 1 / aspect, refractionStrength, reflectionStrength));    // [ 1, 1/aspect, refraction, reflection ]
 			this.distortEffect.Parameters["_Drop1"].SetValue(droplet.MakeShaderParameter(aspect));
 
-			//Draw background for test
+			//First render the background image to the sceneMap rendertarget
 			GraphicsDevice.SetRenderTarget(sceneMap);
-
 			GraphicsDevice.Clear(Color.CornflowerBlue);
 			DrawFullscreenQuad(backgroundTexture, viewport.Width, viewport.Height, null);
 
-			//Drawing sprites effect
+			//Render the water ripple on top of the sceneMap rendertarget
 			spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque, null, DepthStencilState.None, null, distortEffect);
-
-			Color c = Color.White;
 
 			Vector2 scaleFactor = new Vector2(0.5f, 0.5f);
 			Vector2 origin = new Vector2(sceneMap.Width / 2, sceneMap.Height / 2);
-			Vector2 pos = new Vector2((int)spritePos.X, (int)spritePos.Y);
-
-			spriteBatch.Draw(sceneMap,
-						pos,
-						null,
-						c,
-						0f,
-						origin,
-						scaleFactor,
-						SpriteEffects.None,
-						0
-					 );
-
-			//var d = droplet.MakeShaderParameter(aspect);
-			//d.Z += 0.1f;
-			//this.distortEffect.Parameters["_Drop1"].SetValue(d);
-
-			//spriteBatch.Draw(sceneMap, new Rectangle(100, 100, 256, 256), Color.White);
+			spriteBatch.Draw(sceneMap, spritePos, null, Color.White, 0f, origin, scaleFactor, SpriteEffects.None, 0);
 
 			spriteBatch.End();
 
+			//finally, darw the completed scenemap rendertarget to the screen
 			GraphicsDevice.SetRenderTarget(null);
 			DrawFullscreenQuad(sceneMap, viewport.Width, viewport.Height, null);
 

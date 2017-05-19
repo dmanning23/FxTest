@@ -33,6 +33,5 @@ namespace Game1
 		{
 			return new Vector3(position.X * aspect, position.Y, time);
 		}
-
 	}
 }
